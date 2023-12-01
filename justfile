@@ -1,10 +1,11 @@
 alias r := run
 alias t := test
 
-default: test
+help:
+    @just -l
 
 run BIN:
-    cargo run --bin {{BIN}}
+    cargo run --bin {{ BIN }}
 
 test:
     cargo test

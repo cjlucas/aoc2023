@@ -1,1 +1,1 @@
-Usage: `just -l`
+Usage: `just`
