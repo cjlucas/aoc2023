@@ -1,6 +1,6 @@
 const INPUT: &str = include_str!("../../inputs/day01.txt");
 
-fn solve(input: &str, words: Vec<(&str, u64)>) -> u64 {
+fn solve<const N: usize>(input: &str, words: [(&str, u64); N]) -> u64 {
     let mut sum = 0;
 
     for line in input.lines() {
@@ -27,7 +27,7 @@ fn solve(input: &str, words: Vec<(&str, u64)>) -> u64 {
 fn part1(input: &str) -> u64 {
     solve(
         input,
-        vec![
+        [
             ("1", 1),
             ("2", 2),
             ("3", 3),
@@ -44,7 +44,7 @@ fn part1(input: &str) -> u64 {
 fn part2(input: &str) -> u64 {
     solve(
         input,
-        vec![
+        [
             ("1", 1),
             ("2", 2),
             ("3", 3),
