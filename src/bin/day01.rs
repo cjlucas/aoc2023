@@ -8,15 +8,17 @@ fn solve(input: &str, words: Vec<(&str, u64)>) -> u64 {
             .iter()
             .filter_map(|(word, val)| line.find(word).map(|idx| (idx, val)))
             .min()
-            .unwrap();
+            .unwrap()
+            .1;
 
         let b = words
             .iter()
             .filter_map(|(word, val)| line.rfind(word).map(|idx| (idx, val)))
             .max()
-            .unwrap();
+            .unwrap()
+            .1;
 
-        sum += (a.1 * 10) + b.1;
+        sum += (a * 10) + b;
     }
 
     sum
