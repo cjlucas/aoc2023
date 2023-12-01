@@ -1,1 +1,1 @@
-AOC 2023
+Usage: `just -l`
