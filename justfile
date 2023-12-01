@@ -11,4 +11,4 @@ test:
     cargo test
 
 watch-test:
-    bacon test
+    @bacon test
