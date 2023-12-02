@@ -1,5 +1,61 @@
 const INPUT: &str = include_str!("../../inputs/day02.txt");
 
+#[derive(Debug)]
+struct Game {
+    id: u64,
+    cube_sets: Vec<CubeSet>,
+}
+
+impl std::str::FromStr for Game {
+    type Err = std::convert::Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (game, rest) = s.split_once(':').unwrap();
+        let (_, id) = game.split_once(' ').unwrap();
+        let id = str::parse(id).unwrap();
+        let cube_sets = rest
+            .trim()
+            .split(';')
+            .map(|cube_set| str::parse(cube_set).unwrap())
+            .collect();
+
+        Ok(Self { id, cube_sets })
+    }
+}
+
+#[derive(Debug)]
+struct CubeSet {
+    num_red: u64,
+    num_green: u64,
+    num_blue: u64,
+}
+
+impl std::str::FromStr for CubeSet {
+    type Err = std::convert::Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut cube_set = Self {
+            num_red: 0,
+            num_green: 0,
+            num_blue: 0,
+        };
+
+        for cube in s.split(',') {
+            let (cnt, color) = cube.trim().split_once(' ').unwrap();
+            let cnt = str::parse(cnt).unwrap();
+
+            match color {
+                "red" => cube_set.num_red = cnt,
+                "green" => cube_set.num_green = cnt,
+                "blue" => cube_set.num_blue = cnt,
+                _ => unreachable!(),
+            }
+        }
+
+        Ok(cube_set)
+    }
+}
+
 fn part1(input: &str) -> u64 {
     const MAX_RED: u64 = 12;
     const MAX_GREEN: u64 = 13;
@@ -7,71 +63,45 @@ fn part1(input: &str) -> u64 {
 
     let mut sum = 0;
 
-    for (line_num, line) in input.lines().enumerate() {
-        let (_, sets) = line.split_once(':').unwrap();
-        let sets = sets.split(";").collect::<Vec<_>>();
+    for line in input.lines() {
+        let game: Game = str::parse(line).unwrap();
 
-        let mut num_red = 0;
-        let mut num_green = 0;
-        let mut num_blue = 0;
-
-        for set in sets {
-            for cube in set.split(',') {
-                let (cnt, color) = cube.trim().split_once(' ').unwrap();
-                let cnt = u64::from_str_radix(cnt, 10).unwrap();
-
-                if color == "red" && cnt > num_red {
-                    num_red = cnt;
-                }
-                if color == "green" && cnt > num_green {
-                    num_green = cnt;
-                }
-                if color == "blue" && cnt > num_blue {
-                    num_blue = cnt;
-                }
-            }
-        }
+        let num_red = game.cube_sets.iter().map(|set| set.num_red).max().unwrap();
+        let num_green = game
+            .cube_sets
+            .iter()
+            .map(|set| set.num_green)
+            .max()
+            .unwrap();
+        let num_blue = game.cube_sets.iter().map(|set| set.num_blue).max().unwrap();
 
         if num_red <= MAX_RED && num_green <= MAX_GREEN && num_blue <= MAX_BLUE {
-            sum += line_num + 1;
+            sum += game.id;
         }
     }
 
-    sum as u64
+    sum
 }
 
 fn part2(input: &str) -> u64 {
     let mut power = 0;
 
     for line in input.lines() {
-        let (_, sets) = line.split_once(':').unwrap();
-        let sets = sets.split(";").collect::<Vec<_>>();
+        let game: Game = str::parse(line).unwrap();
 
-        let mut num_red = 0;
-        let mut num_green = 0;
-        let mut num_blue = 0;
+        let num_red = game.cube_sets.iter().map(|set| set.num_red).max().unwrap();
+        let num_green = game
+            .cube_sets
+            .iter()
+            .map(|set| set.num_green)
+            .max()
+            .unwrap();
+        let num_blue = game.cube_sets.iter().map(|set| set.num_blue).max().unwrap();
 
-        for set in sets {
-            for cube in set.split(',') {
-                let (cnt, color) = cube.trim().split_once(' ').unwrap();
-                let cnt = u64::from_str_radix(cnt, 10).unwrap();
-
-                if color == "red" && cnt > num_red {
-                    num_red = cnt;
-                }
-                if color == "green" && cnt > num_green {
-                    num_green = cnt;
-                }
-                if color == "blue" && cnt > num_blue {
-                    num_blue = cnt;
-                }
-            }
-        }
-
-        power += num_red * num_green * num_blue;
+        power += num_red * num_green * num_blue
     }
 
-    power as u64
+    power
 }
 
 fn main() {
