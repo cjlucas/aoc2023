@@ -1,3 +1,5 @@
+use aoc2023::prelude::*;
+
 const INPUT: &str = include_str!("../../inputs/day02.txt");
 
 #[derive(Debug)]
@@ -79,9 +81,8 @@ fn part1(input: &str) -> u64 {
     const MAX_GREEN: u64 = 13;
     const MAX_BLUE: u64 = 14;
 
-    input
-        .lines()
-        .map(|line| str::parse::<Game>(line).unwrap())
+    parse_lines::<Game>(input)
+        .iter()
         .filter(|game| {
             game.max_red() <= MAX_RED
                 && game.max_green() <= MAX_GREEN
@@ -92,9 +93,8 @@ fn part1(input: &str) -> u64 {
 }
 
 fn part2(input: &str) -> u64 {
-    input
-        .lines()
-        .map(|line| str::parse::<Game>(line).unwrap())
+    parse_lines::<Game>(input)
+        .iter()
         .map(|game| game.max_red() * game.max_green() * game.max_blue())
         .sum()
 }
