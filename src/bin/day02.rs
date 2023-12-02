@@ -6,6 +6,24 @@ struct Game {
     cube_sets: Vec<CubeSet>,
 }
 
+impl Game {
+    fn max_red(&self) -> u64 {
+        self.cube_sets.iter().map(|set| set.num_red).max().unwrap()
+    }
+
+    fn max_green(&self) -> u64 {
+        self.cube_sets
+            .iter()
+            .map(|set| set.num_green)
+            .max()
+            .unwrap()
+    }
+
+    fn max_blue(&self) -> u64 {
+        self.cube_sets.iter().map(|set| set.num_blue).max().unwrap()
+    }
+}
+
 impl std::str::FromStr for Game {
     type Err = std::convert::Infallible;
 
@@ -66,16 +84,8 @@ fn part1(input: &str) -> u64 {
     for line in input.lines() {
         let game: Game = str::parse(line).unwrap();
 
-        let num_red = game.cube_sets.iter().map(|set| set.num_red).max().unwrap();
-        let num_green = game
-            .cube_sets
-            .iter()
-            .map(|set| set.num_green)
-            .max()
-            .unwrap();
-        let num_blue = game.cube_sets.iter().map(|set| set.num_blue).max().unwrap();
-
-        if num_red <= MAX_RED && num_green <= MAX_GREEN && num_blue <= MAX_BLUE {
+        if game.max_red() <= MAX_RED && game.max_green() <= MAX_GREEN && game.max_blue() <= MAX_BLUE
+        {
             sum += game.id;
         }
     }
@@ -89,16 +99,7 @@ fn part2(input: &str) -> u64 {
     for line in input.lines() {
         let game: Game = str::parse(line).unwrap();
 
-        let num_red = game.cube_sets.iter().map(|set| set.num_red).max().unwrap();
-        let num_green = game
-            .cube_sets
-            .iter()
-            .map(|set| set.num_green)
-            .max()
-            .unwrap();
-        let num_blue = game.cube_sets.iter().map(|set| set.num_blue).max().unwrap();
-
-        power += num_red * num_green * num_blue
+        power += game.max_red() * game.max_green() * game.max_blue()
     }
 
     power
