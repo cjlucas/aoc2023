@@ -79,30 +79,24 @@ fn part1(input: &str) -> u64 {
     const MAX_GREEN: u64 = 13;
     const MAX_BLUE: u64 = 14;
 
-    let mut sum = 0;
-
-    for line in input.lines() {
-        let game: Game = str::parse(line).unwrap();
-
-        if game.max_red() <= MAX_RED && game.max_green() <= MAX_GREEN && game.max_blue() <= MAX_BLUE
-        {
-            sum += game.id;
-        }
-    }
-
-    sum
+    input
+        .lines()
+        .map(|line| str::parse::<Game>(line).unwrap())
+        .filter(|game| {
+            game.max_red() <= MAX_RED
+                && game.max_green() <= MAX_GREEN
+                && game.max_blue() <= MAX_BLUE
+        })
+        .map(|game| game.id)
+        .sum()
 }
 
 fn part2(input: &str) -> u64 {
-    let mut power = 0;
-
-    for line in input.lines() {
-        let game: Game = str::parse(line).unwrap();
-
-        power += game.max_red() * game.max_green() * game.max_blue()
-    }
-
-    power
+    input
+        .lines()
+        .map(|line| str::parse::<Game>(line).unwrap())
+        .map(|game| game.max_red() * game.max_green() * game.max_blue())
+        .sum()
 }
 
 fn main() {
