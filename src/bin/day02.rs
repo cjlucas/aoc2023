@@ -82,7 +82,6 @@ fn part1(input: &str) -> u64 {
     const MAX_BLUE: u64 = 14;
 
     parse_lines::<Game>(input)
-        .iter()
         .filter(|game| {
             game.max_red() <= MAX_RED
                 && game.max_green() <= MAX_GREEN
@@ -94,7 +93,6 @@ fn part1(input: &str) -> u64 {
 
 fn part2(input: &str) -> u64 {
     parse_lines::<Game>(input)
-        .iter()
         .map(|game| game.max_red() * game.max_green() * game.max_blue())
         .sum()
 }
