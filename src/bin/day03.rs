@@ -9,6 +9,12 @@ struct Grid {
     tiles: HashMap<(usize, usize), char>,
 }
 
+impl Grid {
+    fn get(&self, row: usize, col: usize) -> Option<char> {
+        self.tiles.get(&(col, row)).copied()
+    }
+}
+
 impl std::str::FromStr for Grid {
     type Err = std::convert::Infallible;
 
@@ -46,26 +52,15 @@ fn num_from_digits(chars: &[char]) -> u64 {
 }
 
 fn part1(input: &str) -> u64 {
-    let mut schematic = HashMap::<(usize, usize), char>::new();
-
-    let mut num_rows = 0;
-    let mut num_cols = 0;
-    for (row_idx, row) in input.lines().enumerate() {
-        num_rows += 1;
-        num_cols = row.len();
-
-        for (col_idx, ch) in row.chars().enumerate() {
-            schematic.insert((col_idx, row_idx), ch);
-        }
-    }
+    let grid: Grid = str::parse(input).unwrap();
 
     let mut sum = 0;
 
     let mut num = vec![];
     let mut is_adjacent = false;
-    for j in 0..num_rows {
-        for i in 0..num_cols {
-            let ch = *schematic.get(&(i, j)).unwrap();
+    for row in 0..grid.num_rows {
+        for col in 0..grid.num_cols {
+            let ch = grid.get(row, col).unwrap();
             if char::is_digit(ch, 10) {
                 num.push(ch);
                 let adjacent_tiles = vec![
@@ -80,17 +75,17 @@ fn part1(input: &str) -> u64 {
                 ];
 
                 for (x, y) in adjacent_tiles {
-                    let i = i as i64;
-                    let j = j as i64;
+                    let row = row as i64;
+                    let col = col as i64;
 
-                    let Some(x) = i.checked_add(x) else {
+                    let Some(x) = col.checked_add(x) else {
                         continue;
                     };
-                    let Some(y) = j.checked_add(y) else {
+                    let Some(y) = row.checked_add(y) else {
                         continue;
                     };
 
-                    let Some(&c) = schematic.get(&(x as usize, y as usize)) else {
+                    let Some(c) = grid.get(y as usize, x as usize) else {
                         continue;
                     };
 
