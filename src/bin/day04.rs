@@ -1,6 +1,6 @@
 use aoc2023::prelude::*;
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 const INPUT: &str = include_str!("../../inputs/day04.txt");
 
@@ -57,7 +57,22 @@ fn part1(input: &str) -> u64 {
 }
 
 fn part2(input: &str) -> u64 {
-    unreachable!()
+    let cards: Vec<_> = parse_lines::<Card>(input).collect();
+    let mut num_cards = HashMap::<u64, u64>::new();
+
+    for card in cards {
+        let n = num_cards.entry(card.id).or_insert_with(|| 0);
+        *n += 1;
+
+        for _ in 0..*n {
+            for id in card.id..=(card.id + card.num_matches()) {
+                let cnt = num_cards.entry(id).or_default();
+                *cnt += 1;
+            }
+        }
+    }
+
+    num_cards.values().sum::<u64>() / 2
 }
 
 fn main() {
@@ -80,15 +95,15 @@ mod tests {
         assert_eq!(part1(INPUT), 24160);
     }
 
-    // #[test]
-    // fn test_part2_example() {
-    //     let input = include_str!("../../inputs/day04_example.txt");
-    //     assert_eq!(part2(input), 2286);
-    // }
+    #[test]
+    fn test_part2_example() {
+        let input = include_str!("../../inputs/day04_example.txt");
+        assert_eq!(part2(input), 30);
+    }
 
-    // #[test]
-    // fn test_part2() {
-    //     let input = include_str!("../../inputs/day04.txt");
-    //     assert_eq!(part2(input), 71585);
-    // }
+    #[test]
+    fn test_part2() {
+        let input = include_str!("../../inputs/day04.txt");
+        assert_eq!(part2(input), 5659035);
+    }
 }
