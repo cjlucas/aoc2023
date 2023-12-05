@@ -1,7 +1,3 @@
-use aoc2023::prelude::*;
-
-use std::collections::{btree_set::Difference, HashMap};
-
 const INPUT: &str = include_str!("../../inputs/day05.txt");
 
 #[derive(Debug, Default)]
@@ -423,115 +419,117 @@ fn part2(input: &str) -> u64 {
             .push((dst_start, src_start, range_len));
     }
 
-    let mut locations = vec![];
-    for (range_start, num_seeds) in seed_ranges {
-        for i in 0..num_seeds {
-            let seed = range_start + i;
+    for location in 0.. {
+        let mut humidity = None;
 
-            let mut soil = None;
-            for (dst_start, src_start, range_len) in &almanac.seed_to_soil {
-                if (*src_start..(*src_start + *range_len)).contains(&seed) {
-                    soil = Some(*dst_start + (seed - *src_start));
-                }
+        for (dst_start, src_start, range_len) in &almanac.humidity_to_location {
+            if (*dst_start..(*dst_start + *range_len)).contains(&location) {
+                humidity = Some(*src_start + (location - *dst_start));
             }
-
-            if soil.is_none() {
-                soil = Some(seed);
-            }
-
-            let soil = soil.unwrap();
-
-            let mut fertilizer = None;
-            for (dst_start, src_start, range_len) in &almanac.soil_to_fertilizer {
-                if (*src_start..(*src_start + *range_len)).contains(&soil) {
-                    fertilizer = Some(*dst_start + (soil - *src_start));
-                }
-            }
-
-            if fertilizer.is_none() {
-                fertilizer = Some(soil);
-            }
-
-            let fertilizer = fertilizer.unwrap();
-
-            let mut water = None;
-            for (dst_start, src_start, range_len) in &almanac.fertilizer_to_water {
-                if (*src_start..(*src_start + *range_len)).contains(&fertilizer) {
-                    water = Some(*dst_start + (fertilizer - *src_start));
-                }
-            }
-
-            if water.is_none() {
-                water = Some(fertilizer);
-            }
-
-            let water = water.unwrap();
-
-            let mut light = None;
-            for (dst_start, src_start, range_len) in &almanac.water_to_light {
-                if (*src_start..(*src_start + *range_len)).contains(&water) {
-                    light = Some(*dst_start + (water - *src_start));
-                }
-            }
-
-            if light.is_none() {
-                light = Some(water);
-            }
-
-            let light = light.unwrap();
-
-            let mut temperature = None;
-            for (dst_start, src_start, range_len) in &almanac.light_to_temperature {
-                if (*src_start..(*src_start + *range_len)).contains(&light) {
-                    temperature = Some(*dst_start + (light - *src_start));
-                }
-            }
-
-            if temperature.is_none() {
-                temperature = Some(light);
-            }
-
-            let temperature = temperature.unwrap();
-
-            let mut humidity = None;
-            for (dst_start, src_start, range_len) in &almanac.temperature_to_humidity {
-                if (*src_start..(*src_start + *range_len)).contains(&temperature) {
-                    humidity = Some(*dst_start + (temperature - *src_start));
-                }
-            }
-
-            if humidity.is_none() {
-                humidity = Some(temperature);
-            }
-
-            let humidity = humidity.unwrap();
-
-            let mut location = None;
-            for (dst_start, src_start, range_len) in &almanac.humidity_to_location {
-                if (*src_start..(*src_start + *range_len)).contains(&humidity) {
-                    location = Some(*dst_start + (humidity - *src_start));
-                }
-            }
-
-            if location.is_none() {
-                location = Some(humidity);
-            }
-
-            let location = location.unwrap();
-
-            // println!(
-            //     "seed = {seed}, soil = {soil}, fert = {fertilizer}, water = {water}, light = {light}, temp = {temperature}, humidity = {humidity}"
-            // );
-            // , water = {water}, light = {light}, temperature = {temperature}, humidity = {humidity}, location = {location}");
-
-            locations.push(location);
-            dbg!(locations.len());
         }
 
-        // dbg!(&almanac);
+        if humidity.is_none() {
+            humidity = Some(location)
+        }
+
+        let humidity = humidity.unwrap();
+
+        let mut temperature = None;
+
+        for (dst_start, src_start, range_len) in &almanac.temperature_to_humidity {
+            if (*dst_start..(*dst_start + *range_len)).contains(&humidity) {
+                temperature = Some(*src_start + (humidity - *dst_start));
+            }
+        }
+
+        if temperature.is_none() {
+            temperature = Some(humidity)
+        }
+
+        let temperature = temperature.unwrap();
+
+        let mut light = None;
+
+        for (dst_start, src_start, range_len) in &almanac.light_to_temperature {
+            if (*dst_start..(*dst_start + *range_len)).contains(&temperature) {
+                light = Some(*src_start + (temperature - *dst_start));
+            }
+        }
+
+        if light.is_none() {
+            light = Some(temperature)
+        }
+
+        let light = light.unwrap();
+
+        let mut water = None;
+
+        for (dst_start, src_start, range_len) in &almanac.water_to_light {
+            if (*dst_start..(*dst_start + *range_len)).contains(&light) {
+                water = Some(*src_start + (light - *dst_start));
+            }
+        }
+
+        if water.is_none() {
+            water = Some(light)
+        }
+
+        let water = water.unwrap();
+
+        let mut fertilizer = None;
+
+        for (dst_start, src_start, range_len) in &almanac.fertilizer_to_water {
+            if (*dst_start..(*dst_start + *range_len)).contains(&water) {
+                fertilizer = Some(*src_start + (water - *dst_start));
+            }
+        }
+
+        if fertilizer.is_none() {
+            fertilizer = Some(water)
+        }
+
+        let fertilizer = fertilizer.unwrap();
+
+        let mut soil = None;
+
+        for (dst_start, src_start, range_len) in &almanac.soil_to_fertilizer {
+            if (*dst_start..(*dst_start + *range_len)).contains(&fertilizer) {
+                soil = Some(*src_start + (fertilizer - *dst_start));
+            }
+        }
+
+        if soil.is_none() {
+            soil = Some(fertilizer)
+        }
+
+        let soil = soil.unwrap();
+
+        let mut seed = None;
+
+        for (dst_start, src_start, range_len) in &almanac.seed_to_soil {
+            if (*dst_start..(*dst_start + *range_len)).contains(&soil) {
+                seed = Some(*src_start + (soil - *dst_start));
+            }
+        }
+
+        if seed.is_none() {
+            seed = Some(soil)
+        }
+
+        let seed = seed.unwrap();
+
+        for (range_start, range_len) in &seed_ranges {
+            if (*range_start..(*range_start + *range_len)).contains(&seed) {
+                return location;
+            }
+        }
+
+        // println!(
+        //     "location = {location}, humidity = {humidity}, temp = {temperature}, light = {light}, water = {water}, fert = {fertilizer}, soil = {soil}, seed = {seed}"
+        // );
     }
 
-    *locations.iter().min().unwrap()
+    unreachable!()
 }
 
 fn main() {
@@ -560,9 +558,10 @@ mod tests {
         assert_eq!(part2(input), 46);
     }
 
-    // #[test]
-    // fn test_part2() {
-    //     let input = include_str!("../../inputs/day05.txt");
-    //     assert_eq!(part2(input), 71585);
-    // }
+    #[ignore]
+    #[test]
+    fn test_part2() {
+        let input = include_str!("../../inputs/day05.txt");
+        assert_eq!(part2(input), 137516820);
+    }
 }
