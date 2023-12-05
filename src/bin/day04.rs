@@ -10,6 +10,21 @@ struct Card {
     numbers: HashSet<u64>,
 }
 
+impl Card {
+    fn num_matches(&self) -> u64 {
+        self.winning_numbers.intersection(&self.numbers).count() as u64
+    }
+
+    fn score(&self) -> u64 {
+        let num_matches = self.num_matches();
+        if num_matches > 0 {
+            1 << (num_matches - 1)
+        } else {
+            0
+        }
+    }
+}
+
 impl std::str::FromStr for Card {
     type Err = std::convert::Infallible;
 
@@ -38,17 +53,7 @@ impl std::str::FromStr for Card {
 }
 
 fn part1(input: &str) -> u64 {
-    parse_lines::<Card>(input)
-        .map(|card| {
-            let num_matches = card.winning_numbers.intersection(&card.numbers).count();
-
-            if num_matches > 0 {
-                1 << (num_matches - 1)
-            } else {
-                0
-            }
-        })
-        .sum()
+    parse_lines::<Card>(input).map(|card| card.score()).sum()
 }
 
 fn part2(input: &str) -> u64 {
