@@ -5,7 +5,7 @@ help:
     @just -l
 
 run BIN:
-    cargo run --bin {{ BIN }}
+    cargo run --release --bin {{ BIN }}
 
 test:
     cargo test
