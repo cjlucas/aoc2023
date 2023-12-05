@@ -12,7 +12,7 @@ struct Almanac {
     humidity_to_location: Vec<(u64, u64, u64)>,
 }
 
-fn part1(input: &str) -> u64 {
+fn parse_almanac(input: &str) -> (Vec<u64>, Almanac) {
     let mut almanac = Almanac::default();
 
     let mut lines = input.lines();
@@ -161,372 +161,76 @@ fn part1(input: &str) -> u64 {
             .push((dst_start, src_start, range_len));
     }
 
+    (seeds, almanac)
+}
+
+fn part1(input: &str) -> u64 {
+    let (seeds, almanac) = parse_almanac(input);
+
     let mut locations = vec![];
     for seed in seeds {
-        let mut soil = None;
-        for (dst_start, src_start, range_len) in &almanac.seed_to_soil {
-            if (*src_start..(*src_start + *range_len)).contains(&seed) {
-                soil = Some(*dst_start + (seed - *src_start));
+        let mut val = seed;
+
+        let maps = [
+            &almanac.seed_to_soil,
+            &almanac.soil_to_fertilizer,
+            &almanac.fertilizer_to_water,
+            &almanac.water_to_light,
+            &almanac.light_to_temperature,
+            &almanac.temperature_to_humidity,
+            &almanac.humidity_to_location,
+        ];
+
+        for map in maps {
+            for (dst_start, src_start, range_len) in map {
+                if (*src_start..(*src_start + *range_len)).contains(&val) {
+                    val = *dst_start + (val - *src_start);
+                    break;
+                }
             }
         }
 
-        if soil.is_none() {
-            soil = Some(seed);
-        }
-
-        let soil = soil.unwrap();
-
-        let mut fertilizer = None;
-        for (dst_start, src_start, range_len) in &almanac.soil_to_fertilizer {
-            if (*src_start..(*src_start + *range_len)).contains(&soil) {
-                fertilizer = Some(*dst_start + (soil - *src_start));
-            }
-        }
-
-        if fertilizer.is_none() {
-            fertilizer = Some(soil);
-        }
-
-        let fertilizer = fertilizer.unwrap();
-
-        let mut water = None;
-        for (dst_start, src_start, range_len) in &almanac.fertilizer_to_water {
-            if (*src_start..(*src_start + *range_len)).contains(&fertilizer) {
-                water = Some(*dst_start + (fertilizer - *src_start));
-            }
-        }
-
-        if water.is_none() {
-            water = Some(fertilizer);
-        }
-
-        let water = water.unwrap();
-
-        let mut light = None;
-        for (dst_start, src_start, range_len) in &almanac.water_to_light {
-            if (*src_start..(*src_start + *range_len)).contains(&water) {
-                light = Some(*dst_start + (water - *src_start));
-            }
-        }
-
-        if light.is_none() {
-            light = Some(water);
-        }
-
-        let light = light.unwrap();
-
-        let mut temperature = None;
-        for (dst_start, src_start, range_len) in &almanac.light_to_temperature {
-            if (*src_start..(*src_start + *range_len)).contains(&light) {
-                temperature = Some(*dst_start + (light - *src_start));
-            }
-        }
-
-        if temperature.is_none() {
-            temperature = Some(light);
-        }
-
-        let temperature = temperature.unwrap();
-
-        let mut humidity = None;
-        for (dst_start, src_start, range_len) in &almanac.temperature_to_humidity {
-            if (*src_start..(*src_start + *range_len)).contains(&temperature) {
-                humidity = Some(*dst_start + (temperature - *src_start));
-            }
-        }
-
-        if humidity.is_none() {
-            humidity = Some(temperature);
-        }
-
-        let humidity = humidity.unwrap();
-
-        let mut location = None;
-        for (dst_start, src_start, range_len) in &almanac.humidity_to_location {
-            if (*src_start..(*src_start + *range_len)).contains(&humidity) {
-                location = Some(*dst_start + (humidity - *src_start));
-            }
-        }
-
-        if location.is_none() {
-            location = Some(humidity);
-        }
-
-        let location = location.unwrap();
-
-        // println!(
-        //     "seed = {seed}, soil = {soil}, fert = {fertilizer}, water = {water}, light = {light}, temp = {temperature}, humidity = {humidity}"
-        // );
-        // , water = {water}, light = {light}, temperature = {temperature}, humidity = {humidity}, location = {location}");
-
-        locations.push(location);
+        locations.push(val);
     }
-
-    // dbg!(&almanac);
 
     *locations.iter().min().unwrap()
 }
 
 fn part2(input: &str) -> u64 {
-    let mut almanac = Almanac::default();
+    let (seed_ranges, almanac) = parse_almanac(input);
 
-    let mut lines = input.lines();
-    let (_, seed_ranges) = lines.next().unwrap().split_once(':').unwrap();
     let seed_ranges: Vec<_> = seed_ranges
-        .split_whitespace()
-        .map(|seed| str::parse::<u64>(seed).unwrap())
-        .collect::<Vec<_>>()
         .chunks_exact(2)
         .map(|chunk| (chunk[0], chunk[1]))
         .collect();
 
-    lines.next();
-    lines.next(); // seed-to-soil map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac.seed_to_soil.push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // soil-to-fertilizer map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .soil_to_fertilizer
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // fertilizer-to-water map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .fertilizer_to_water
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // water-to-light map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .water_to_light
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // light-to_temperature map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .light_to_temperature
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // temperature-to-humidity map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .temperature_to_humidity
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // humidity-to-location map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .humidity_to_location
-            .push((dst_start, src_start, range_len));
-    }
-
     for location in 0.. {
-        let mut humidity = None;
+        let maps = [
+            &almanac.humidity_to_location,
+            &almanac.temperature_to_humidity,
+            &almanac.light_to_temperature,
+            &almanac.water_to_light,
+            &almanac.fertilizer_to_water,
+            &almanac.soil_to_fertilizer,
+            &almanac.seed_to_soil,
+        ];
 
-        for (dst_start, src_start, range_len) in &almanac.humidity_to_location {
-            if (*dst_start..(*dst_start + *range_len)).contains(&location) {
-                humidity = Some(*src_start + (location - *dst_start));
+        let mut val = location;
+
+        for map in maps {
+            for (dst_start, src_start, range_len) in map {
+                if (*dst_start..(*dst_start + *range_len)).contains(&val) {
+                    val = *src_start + (val - *dst_start);
+                    break;
+                }
             }
         }
-
-        if humidity.is_none() {
-            humidity = Some(location)
-        }
-
-        let humidity = humidity.unwrap();
-
-        let mut temperature = None;
-
-        for (dst_start, src_start, range_len) in &almanac.temperature_to_humidity {
-            if (*dst_start..(*dst_start + *range_len)).contains(&humidity) {
-                temperature = Some(*src_start + (humidity - *dst_start));
-            }
-        }
-
-        if temperature.is_none() {
-            temperature = Some(humidity)
-        }
-
-        let temperature = temperature.unwrap();
-
-        let mut light = None;
-
-        for (dst_start, src_start, range_len) in &almanac.light_to_temperature {
-            if (*dst_start..(*dst_start + *range_len)).contains(&temperature) {
-                light = Some(*src_start + (temperature - *dst_start));
-            }
-        }
-
-        if light.is_none() {
-            light = Some(temperature)
-        }
-
-        let light = light.unwrap();
-
-        let mut water = None;
-
-        for (dst_start, src_start, range_len) in &almanac.water_to_light {
-            if (*dst_start..(*dst_start + *range_len)).contains(&light) {
-                water = Some(*src_start + (light - *dst_start));
-            }
-        }
-
-        if water.is_none() {
-            water = Some(light)
-        }
-
-        let water = water.unwrap();
-
-        let mut fertilizer = None;
-
-        for (dst_start, src_start, range_len) in &almanac.fertilizer_to_water {
-            if (*dst_start..(*dst_start + *range_len)).contains(&water) {
-                fertilizer = Some(*src_start + (water - *dst_start));
-            }
-        }
-
-        if fertilizer.is_none() {
-            fertilizer = Some(water)
-        }
-
-        let fertilizer = fertilizer.unwrap();
-
-        let mut soil = None;
-
-        for (dst_start, src_start, range_len) in &almanac.soil_to_fertilizer {
-            if (*dst_start..(*dst_start + *range_len)).contains(&fertilizer) {
-                soil = Some(*src_start + (fertilizer - *dst_start));
-            }
-        }
-
-        if soil.is_none() {
-            soil = Some(fertilizer)
-        }
-
-        let soil = soil.unwrap();
-
-        let mut seed = None;
-
-        for (dst_start, src_start, range_len) in &almanac.seed_to_soil {
-            if (*dst_start..(*dst_start + *range_len)).contains(&soil) {
-                seed = Some(*src_start + (soil - *dst_start));
-            }
-        }
-
-        if seed.is_none() {
-            seed = Some(soil)
-        }
-
-        let seed = seed.unwrap();
 
         for (range_start, range_len) in &seed_ranges {
-            if (*range_start..(*range_start + *range_len)).contains(&seed) {
+            if (*range_start..(*range_start + *range_len)).contains(&val) {
                 return location;
             }
         }
-
-        // println!(
-        //     "location = {location}, humidity = {humidity}, temp = {temperature}, light = {light}, water = {water}, fert = {fertilizer}, soil = {soil}, seed = {seed}"
-        // );
     }
 
     unreachable!()
