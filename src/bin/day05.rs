@@ -56,6 +56,26 @@ impl Almanac {
 
         val
     }
+
+    fn map_location_to_seed(&self, location: u64) -> u64 {
+        let maps = [
+            &self.humidity_to_location,
+            &self.temperature_to_humidity,
+            &self.light_to_temperature,
+            &self.water_to_light,
+            &self.fertilizer_to_water,
+            &self.soil_to_fertilizer,
+            &self.seed_to_soil,
+        ];
+
+        let mut val = location;
+
+        for map in maps {
+            val = map.dst_to_src(val);
+        }
+
+        val
+    }
 }
 
 fn parse_map(input: &str) -> Map {
@@ -117,24 +137,10 @@ fn part2(input: &str) -> u64 {
         .collect();
 
     for location in 0.. {
-        let maps = [
-            &almanac.humidity_to_location,
-            &almanac.temperature_to_humidity,
-            &almanac.light_to_temperature,
-            &almanac.water_to_light,
-            &almanac.fertilizer_to_water,
-            &almanac.soil_to_fertilizer,
-            &almanac.seed_to_soil,
-        ];
-
-        let mut val = location;
-
-        for map in maps {
-            val = map.dst_to_src(val);
-        }
+        let seed = almanac.map_location_to_seed(location);
 
         for (range_start, range_len) in &seed_ranges {
-            if (*range_start..(*range_start + *range_len)).contains(&val) {
+            if (*range_start..(*range_start + *range_len)).contains(&seed) {
                 return location;
             }
         }
