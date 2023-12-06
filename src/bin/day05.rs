@@ -1,14 +1,39 @@
 const INPUT: &str = include_str!("../../inputs/day05.txt");
 
+#[derive(Default, Debug)]
+struct Map(Vec<(u64, u64, u64)>);
+
+impl Map {
+    fn src_to_dst(&self, src: u64) -> u64 {
+        for (dst_start, src_start, range_len) in &self.0 {
+            if (*src_start..(*src_start + *range_len)).contains(&src) {
+                return *dst_start + (src - *src_start);
+            }
+        }
+
+        src
+    }
+
+    fn dst_to_src(&self, dst: u64) -> u64 {
+        for (dst_start, src_start, range_len) in &self.0 {
+            if (*dst_start..(*dst_start + *range_len)).contains(&dst) {
+                return *src_start + (dst - *dst_start);
+            }
+        }
+
+        dst
+    }
+}
+
 #[derive(Debug, Default)]
 struct Almanac {
-    seed_to_soil: Vec<(u64, u64, u64)>,
-    soil_to_fertilizer: Vec<(u64, u64, u64)>,
-    fertilizer_to_water: Vec<(u64, u64, u64)>,
-    water_to_light: Vec<(u64, u64, u64)>,
-    light_to_temperature: Vec<(u64, u64, u64)>,
-    temperature_to_humidity: Vec<(u64, u64, u64)>,
-    humidity_to_location: Vec<(u64, u64, u64)>,
+    seed_to_soil: Map,
+    soil_to_fertilizer: Map,
+    fertilizer_to_water: Map,
+    water_to_light: Map,
+    light_to_temperature: Map,
+    temperature_to_humidity: Map,
+    humidity_to_location: Map,
 }
 
 impl Almanac {
@@ -26,20 +51,15 @@ impl Almanac {
         ];
 
         for map in maps {
-            for (dst_start, src_start, range_len) in map {
-                if (*src_start..(*src_start + *range_len)).contains(&val) {
-                    val = *dst_start + (val - *src_start);
-                    break;
-                }
-            }
+            val = map.src_to_dst(val);
         }
 
         val
     }
 }
 
-fn parse_map(input: &str) -> Vec<(u64, u64, u64)> {
-    input
+fn parse_map(input: &str) -> Map {
+    Map(input
         .lines()
         .skip(1)
         .map(|line| {
@@ -53,7 +73,7 @@ fn parse_map(input: &str) -> Vec<(u64, u64, u64)> {
                 vals.next().unwrap(),
             )
         })
-        .collect()
+        .collect())
 }
 
 fn parse_almanac(input: &str) -> (Vec<u64>, Almanac) {
@@ -110,12 +130,7 @@ fn part2(input: &str) -> u64 {
         let mut val = location;
 
         for map in maps {
-            for (dst_start, src_start, range_len) in map {
-                if (*dst_start..(*dst_start + *range_len)).contains(&val) {
-                    val = *src_start + (val - *dst_start);
-                    break;
-                }
-            }
+            val = map.dst_to_src(val);
         }
 
         for (range_start, range_len) in &seed_ranges {
