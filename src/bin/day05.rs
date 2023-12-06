@@ -2,7 +2,6 @@ const INPUT: &str = include_str!("../../inputs/day05.txt");
 
 #[derive(Debug, Default)]
 struct Almanac {
-    // seeds: Vec<u64>,
     seed_to_soil: Vec<(u64, u64, u64)>,
     soil_to_fertilizer: Vec<(u64, u64, u64)>,
     fertilizer_to_water: Vec<(u64, u64, u64)>,
@@ -12,154 +11,42 @@ struct Almanac {
     humidity_to_location: Vec<(u64, u64, u64)>,
 }
 
+fn parse_map(input: &str) -> Vec<(u64, u64, u64)> {
+    input
+        .lines()
+        .skip(1)
+        .map(|line| {
+            let mut vals = line
+                .split_whitespace()
+                .map(|n| str::parse::<u64>(n).unwrap());
+
+            (
+                vals.next().unwrap(),
+                vals.next().unwrap(),
+                vals.next().unwrap(),
+            )
+        })
+        .collect()
+}
+
 fn parse_almanac(input: &str) -> (Vec<u64>, Almanac) {
     let mut almanac = Almanac::default();
 
-    let mut lines = input.lines();
-    let (_, seeds) = lines.next().unwrap().split_once(':').unwrap();
+    let mut parts = input.split("\n\n");
+
+    let (_, seeds) = parts.next().unwrap().split_once(':').unwrap();
     let seeds: Vec<u64> = seeds
         .split_whitespace()
         .map(|seed| str::parse(seed).unwrap())
         .collect();
 
-    lines.next();
-    lines.next(); // seed-to-soil map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac.seed_to_soil.push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // soil-to-fertilizer map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .soil_to_fertilizer
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // fertilizer-to-water map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .fertilizer_to_water
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // water-to-light map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .water_to_light
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // light-to_temperature map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .light_to_temperature
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // temperature-to-humidity map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .temperature_to_humidity
-            .push((dst_start, src_start, range_len));
-    }
-
-    dbg!(lines.next()); // humidity-to-location map:
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let n: Vec<_> = line
-            .split_whitespace()
-            .map(|n| str::parse::<u64>(n).unwrap())
-            .collect();
-
-        let dst_start = n[0];
-        let src_start = n[1];
-        let range_len = n[2];
-
-        almanac
-            .humidity_to_location
-            .push((dst_start, src_start, range_len));
-    }
+    almanac.seed_to_soil = parse_map(parts.next().unwrap());
+    almanac.soil_to_fertilizer = parse_map(parts.next().unwrap());
+    almanac.fertilizer_to_water = parse_map(parts.next().unwrap());
+    almanac.water_to_light = parse_map(parts.next().unwrap());
+    almanac.light_to_temperature = parse_map(parts.next().unwrap());
+    almanac.temperature_to_humidity = parse_map(parts.next().unwrap());
+    almanac.humidity_to_location = parse_map(parts.next().unwrap());
 
     (seeds, almanac)
 }
