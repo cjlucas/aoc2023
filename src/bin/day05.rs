@@ -11,6 +11,33 @@ struct Almanac {
     humidity_to_location: Vec<(u64, u64, u64)>,
 }
 
+impl Almanac {
+    fn map_seed_to_location(&self, seed: u64) -> u64 {
+        let mut val = seed;
+
+        let maps = [
+            &self.seed_to_soil,
+            &self.soil_to_fertilizer,
+            &self.fertilizer_to_water,
+            &self.water_to_light,
+            &self.light_to_temperature,
+            &self.temperature_to_humidity,
+            &self.humidity_to_location,
+        ];
+
+        for map in maps {
+            for (dst_start, src_start, range_len) in map {
+                if (*src_start..(*src_start + *range_len)).contains(&val) {
+                    val = *dst_start + (val - *src_start);
+                    break;
+                }
+            }
+        }
+
+        val
+    }
+}
+
 fn parse_map(input: &str) -> Vec<(u64, u64, u64)> {
     input
         .lines()
@@ -54,33 +81,11 @@ fn parse_almanac(input: &str) -> (Vec<u64>, Almanac) {
 fn part1(input: &str) -> u64 {
     let (seeds, almanac) = parse_almanac(input);
 
-    let mut locations = vec![];
-    for seed in seeds {
-        let mut val = seed;
-
-        let maps = [
-            &almanac.seed_to_soil,
-            &almanac.soil_to_fertilizer,
-            &almanac.fertilizer_to_water,
-            &almanac.water_to_light,
-            &almanac.light_to_temperature,
-            &almanac.temperature_to_humidity,
-            &almanac.humidity_to_location,
-        ];
-
-        for map in maps {
-            for (dst_start, src_start, range_len) in map {
-                if (*src_start..(*src_start + *range_len)).contains(&val) {
-                    val = *dst_start + (val - *src_start);
-                    break;
-                }
-            }
-        }
-
-        locations.push(val);
-    }
-
-    *locations.iter().min().unwrap()
+    seeds
+        .into_iter()
+        .map(|seed| almanac.map_seed_to_location(seed))
+        .min()
+        .unwrap()
 }
 
 fn part2(input: &str) -> u64 {
