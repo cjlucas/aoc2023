@@ -38,9 +38,7 @@ struct Almanac {
 
 impl Almanac {
     fn map_seed_to_location(&self, seed: u64) -> u64 {
-        let mut val = seed;
-
-        let maps = [
+        [
             &self.seed_to_soil,
             &self.soil_to_fertilizer,
             &self.fertilizer_to_water,
@@ -48,17 +46,13 @@ impl Almanac {
             &self.light_to_temperature,
             &self.temperature_to_humidity,
             &self.humidity_to_location,
-        ];
-
-        for map in maps {
-            val = map.src_to_dst(val);
-        }
-
-        val
+        ]
+        .iter()
+        .fold(seed, |acc, map| map.src_to_dst(acc))
     }
 
     fn map_location_to_seed(&self, location: u64) -> u64 {
-        let maps = [
+        [
             &self.humidity_to_location,
             &self.temperature_to_humidity,
             &self.light_to_temperature,
@@ -66,15 +60,9 @@ impl Almanac {
             &self.fertilizer_to_water,
             &self.soil_to_fertilizer,
             &self.seed_to_soil,
-        ];
-
-        let mut val = location;
-
-        for map in maps {
-            val = map.dst_to_src(val);
-        }
-
-        val
+        ]
+        .iter()
+        .fold(location, |acc, map| map.dst_to_src(acc))
     }
 }
 
@@ -133,14 +121,17 @@ fn part2(input: &str) -> u64 {
 
     let seed_ranges: Vec<_> = seed_ranges
         .chunks_exact(2)
-        .map(|chunk| (chunk[0], chunk[1]))
+        .map(|chunk| std::ops::Range {
+            start: chunk[0],
+            end: chunk[0] + chunk[1],
+        })
         .collect();
 
     for location in 0.. {
         let seed = almanac.map_location_to_seed(location);
 
-        for (range_start, range_len) in &seed_ranges {
-            if (*range_start..(*range_start + *range_len)).contains(&seed) {
+        for range in &seed_ranges {
+            if range.contains(&seed) {
                 return location;
             }
         }
