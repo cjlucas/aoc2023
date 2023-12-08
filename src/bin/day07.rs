@@ -27,7 +27,7 @@ struct Hand {
 
 impl Hand {
     fn hand_type(&self) -> HandType {
-        let counts: HashMap<Card, usize> =
+        let mut counts: HashMap<Card, usize> =
             self.cards
                 .iter()
                 .fold(HashMap::<Card, usize>::new(), |mut counts, card| {
@@ -35,18 +35,22 @@ impl Hand {
                     counts
                 });
 
+        let jokers = counts.remove(&Card::Jack).unwrap_or_default();
+
         let mut counts: Vec<_> = counts.into_values().collect();
         counts.sort();
 
         let mut counts = counts.into_iter().rev();
 
-        let counts: [usize; 5] = [
+        let mut counts: [usize; 5] = [
             counts.next().unwrap_or_default(),
             counts.next().unwrap_or_default(),
             counts.next().unwrap_or_default(),
             counts.next().unwrap_or_default(),
             counts.next().unwrap_or_default(),
         ];
+
+        counts[0] += jokers;
 
         match counts {
             [5, ..] => HandType::FiveOfAKind,
@@ -116,6 +120,7 @@ const CARD_CHAR_MAPPPING: [(Card, char); 13] = [
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 enum Card {
+    Jack,
     Two,
     Three,
     Four,
@@ -125,7 +130,6 @@ enum Card {
     Eight,
     Nine,
     Ten,
-    Jack,
     Queen,
     King,
     Ace,
@@ -185,7 +189,7 @@ fn part2(input: &str) -> u64 {
 }
 
 fn main() {
-    println!("part1: {}", part1(INPUT));
+    // println!("part1: {}", part1(INPUT));
     println!("part2: {}", part2(INPUT));
 }
 
@@ -193,26 +197,26 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_part1_example() {
-        let input = include_str!("../../inputs/day07p1_example.txt");
-        assert_eq!(part1(input), 6440);
-    }
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(part1(INPUT), 255048101);
-    }
-
     // #[test]
-    // fn test_part2_example() {
-    //     let input = include_str!("../../inputs/day07p2_example.txt");
-    //     assert_eq!(part2(input), 5905);
+    // fn test_part1_example() {
+    //     let input = include_str!("../../inputs/day07p1_example.txt");
+    //     assert_eq!(part1(input), 6440);
     // }
 
     // #[test]
-    // fn test_part2() {
-    //     let input = include_str!("../../inputs/day07.txt");
-    //     assert_eq!(part2(input), 71585);
+    // fn test_part1() {
+    //     assert_eq!(part1(INPUT), 255048101);
     // }
+
+    #[test]
+    fn test_part2_example() {
+        let input = include_str!("../../inputs/day07p2_example.txt");
+        assert_eq!(part2(input), 5905);
+    }
+
+    #[test]
+    fn test_part2() {
+        let input = include_str!("../../inputs/day07.txt");
+        assert_eq!(part2(input), 253718286);
+    }
 }
