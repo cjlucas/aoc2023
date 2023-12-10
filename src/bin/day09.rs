@@ -94,7 +94,6 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        let input = include_str!("../../inputs/day09.txt");
-        assert_eq!(part2(input), 903);
+        assert_eq!(part2(INPUT), 903);
     }
 }
