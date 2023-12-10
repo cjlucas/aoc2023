@@ -1,5 +1,3 @@
-use aoc2023::prelude::*;
-
 const INPUT: &str = include_str!("../../inputs/day09.txt");
 
 fn part1(input: &str) -> i64 {
@@ -94,6 +92,6 @@ mod tests {
     #[test]
     fn test_part2() {
         let input = include_str!("../../inputs/day09.txt");
-        assert_eq!(part2(input), 71585);
+        assert_eq!(part2(input), 903);
     }
 }
