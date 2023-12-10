@@ -1,17 +1,46 @@
+use aoc2023::prelude::parse_lines;
+
 const INPUT: &str = include_str!("../../inputs/day09.txt");
 
-fn part1(input: &str) -> i64 {
-    let mut sums = vec![];
+struct History {
+    differences: Vec<Vec<i64>>,
+}
 
-    for line in input.lines() {
-        let mut foo: Vec<Vec<i64>> = vec![line
+impl History {
+    fn extrapolate_next(&mut self) -> i64 {
+        for i in (1..self.differences.len()).rev() {
+            let curlast = *self.differences[i].last().unwrap();
+            let prevlast = *self.differences[i - 1].last().unwrap();
+            self.differences[i - 1].push(curlast + prevlast);
+        }
+
+        *self.differences[0].last().unwrap()
+    }
+
+    fn extrapolate_prev(&mut self) -> i64 {
+        for i in (1..self.differences.len()).rev() {
+            let curfirst = self.differences[i][0];
+            let prevfirst = self.differences[i - 1][0];
+            self.differences[i - 1].insert(0, prevfirst - curfirst);
+        }
+
+        self.differences[0][0]
+    }
+}
+
+impl std::str::FromStr for History {
+    type Err = std::convert::Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut history: Vec<Vec<i64>> = vec![s
             .split_whitespace()
             .map(|n| str::parse::<i64>(n).unwrap())
             .collect()];
 
-        while !foo.last().unwrap().iter().all(|n| *n == 0) {
-            foo.push(
-                foo.last()
+        while !history.last().unwrap().iter().all(|n| *n == 0) {
+            history.push(
+                history
+                    .last()
                     .unwrap()
                     .windows(2)
                     .map(|window| window[1] - window[0])
@@ -19,48 +48,22 @@ fn part1(input: &str) -> i64 {
             );
         }
 
-        for i in (1..foo.len()).rev() {
-            let curlast = *foo[i].iter().last().unwrap();
-            let prevlast = *foo[i - 1].iter().last().unwrap();
-            foo[i - 1].push(curlast + prevlast);
-        }
-
-        sums.push(*foo.iter().next().unwrap().iter().last().unwrap());
+        Ok(Self {
+            differences: history,
+        })
     }
+}
 
-    sums.iter().sum()
+fn part1(input: &str) -> i64 {
+    parse_lines::<History>(input)
+        .map(|mut history| history.extrapolate_next())
+        .sum()
 }
 
 fn part2(input: &str) -> i64 {
-    let mut sums = vec![];
-
-    for line in input.lines() {
-        let mut foo: Vec<Vec<i64>> = vec![line
-            .split_whitespace()
-            .map(|n| str::parse::<i64>(n).unwrap())
-            .collect()];
-
-        while !foo.last().unwrap().iter().all(|n| *n == 0) {
-            foo.push(
-                foo.last()
-                    .unwrap()
-                    .windows(2)
-                    .map(|window| window[1] - window[0])
-                    .collect(),
-            );
-        }
-
-        for i in (1..foo.len()).rev() {
-            let curlast = *foo[i].iter().next().unwrap();
-            let prevlast = *foo[i - 1].iter().next().unwrap();
-            foo[i - 1].insert(0, prevlast - curlast);
-        }
-
-        // println!("{:?}", foo);
-        sums.push(*foo.iter().next().unwrap().iter().next().unwrap());
-    }
-
-    sums.iter().sum()
+    parse_lines::<History>(input)
+        .map(|mut history| history.extrapolate_prev())
+        .sum()
 }
 
 fn main() {
