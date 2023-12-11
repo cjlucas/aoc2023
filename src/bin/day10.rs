@@ -29,8 +29,8 @@ impl Point {
 }
 
 struct Grid {
-    // nrows: usize,
-    // ncols: usize,
+    nrows: usize,
+    ncols: usize,
     tiles: HashMap<Point, char>,
 }
 
@@ -61,6 +61,24 @@ impl Grid {
             .get(&adjacent_point)
             .map(|c| (adjacent_point, *c))
     }
+
+    fn next_direction(&self, dir: Direction, tile: char) -> Option<Direction> {
+        match (dir, tile) {
+            (Direction::N, '|') => Some(Direction::N),
+            (Direction::S, '|') => Some(Direction::S),
+            (Direction::E, '-') => Some(Direction::E),
+            (Direction::W, '-') => Some(Direction::W),
+            (Direction::S, 'L') => Some(Direction::E),
+            (Direction::W, 'L') => Some(Direction::N),
+            (Direction::E, 'J') => Some(Direction::N),
+            (Direction::S, 'J') => Some(Direction::W),
+            (Direction::E, '7') => Some(Direction::S),
+            (Direction::N, '7') => Some(Direction::W),
+            (Direction::N, 'F') => Some(Direction::E),
+            (Direction::W, 'F') => Some(Direction::S),
+            _ => None,
+        }
+    }
 }
 
 impl std::str::FromStr for Grid {
@@ -68,10 +86,11 @@ impl std::str::FromStr for Grid {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut nrows = 0;
+        let mut ncols = 0;
         let mut tiles = HashMap::new();
 
         for line in s.lines() {
-            let mut ncols = 0;
+            ncols = 0;
 
             for c in line.chars() {
                 let point = Point::new(nrows, ncols);
@@ -83,8 +102,8 @@ impl std::str::FromStr for Grid {
         }
 
         Ok(Self {
-            // nrows,
-            // ncols,
+            nrows,
+            ncols,
             tiles,
         })
     }
@@ -103,14 +122,7 @@ fn part1(input: &str) -> usize {
             continue;
         };
 
-        let valid_tiles = match dir {
-            Direction::N => "|7F",
-            Direction::E => "-7J",
-            Direction::S => "|LJ",
-            Direction::W => "-LF",
-        };
-
-        if valid_tiles.chars().any(|c| tile == c) {
+        if grid.next_direction(dir, tile).is_some() {
             valid_starting_points.push((dir, p));
         }
     }
@@ -125,7 +137,6 @@ fn part1(input: &str) -> usize {
 
         loop {
             let cur_tile = grid.tiles.get(&cur_point).unwrap();
-            println!("{cur_tile}");
             if *cur_tile == 'S' {
                 break;
             }
@@ -136,22 +147,7 @@ fn part1(input: &str) -> usize {
                 .or_default()
                 .push(distance_from_start);
 
-            cur_dir = match (cur_dir, cur_tile) {
-                (Direction::N, '|') => Direction::N,
-                (Direction::S, '|') => Direction::S,
-                (Direction::E, '-') => Direction::E,
-                (Direction::W, '-') => Direction::W,
-                (Direction::S, 'L') => Direction::E,
-                (Direction::W, 'L') => Direction::N,
-                (Direction::E, 'J') => Direction::N,
-                (Direction::S, 'J') => Direction::W,
-                (Direction::E, '7') => Direction::S,
-                (Direction::N, '7') => Direction::W,
-                (Direction::N, 'F') => Direction::E,
-                (Direction::W, 'F') => Direction::S,
-                (d, c) => panic!("unexpected dir, char combo: {d:?} {c}"),
-            };
-
+            cur_dir = grid.next_direction(cur_dir, *cur_tile).unwrap();
             cur_point = grid.adjacent_tile(&cur_point, cur_dir).unwrap().0;
         }
     }
@@ -164,6 +160,14 @@ fn part1(input: &str) -> usize {
 }
 
 fn part2(input: &str) -> usize {
+    let grid: Grid = str::parse(input).unwrap();
+
+    for row in 0..grid.nrows {
+        for col in 0..grid.ncols {
+            let p = Point::new(row, col);
+        }
+    }
+
     unreachable!()
 }
 
@@ -193,11 +197,23 @@ mod tests {
         assert_eq!(part1(INPUT), 6870);
     }
 
-    // #[test]
-    // fn test_part2_example() {
-    //     let input = include_str!("../../inputs/day10_example.txt");
-    //     assert_eq!(part2(input), -1);
-    // }
+    #[test]
+    fn test_part2_example1() {
+        let input = include_str!("../../inputs/day10p2_example1.txt");
+        assert_eq!(part2(input), 4);
+    }
+
+    #[test]
+    fn test_part2_example2() {
+        let input = include_str!("../../inputs/day10p2_example2.txt");
+        assert_eq!(part2(input), 8);
+    }
+
+    #[test]
+    fn test_part2_example3() {
+        let input = include_str!("../../inputs/day10p2_example3.txt");
+        assert_eq!(part2(input), 10);
+    }
 
     // #[test]
     // fn test_part2() {
