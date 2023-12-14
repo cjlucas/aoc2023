@@ -9,3 +9,4 @@ edition = "2021"
 name = "day01"
 
 [dependencies]
+itertools = "0.12.0"
