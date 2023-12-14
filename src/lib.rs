@@ -1,4 +1,6 @@
 pub mod prelude {
+    pub use std::collections::HashMap;
+
     pub struct ParseLines<'a, T> {
         inner: std::str::Lines<'a>,
         _data: std::marker::PhantomData<T>,
